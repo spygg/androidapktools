@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icon/apk.png</file>
+    </qresource>
+</RCC>
