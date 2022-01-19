@@ -36,21 +36,26 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     a.setWindowIcon(QIcon(":/icon/apk.png"));
 
+    QString currentPath = QCoreApplication::applicationDirPath();
+
     //先拷贝必要的资源到制定路径
-    QString scripts = QString("%1/").arg(QCoreApplication::applicationDirPath());
+    QString scripts = QString("%1/").arg(currentPath);
     copyFiles(":/res/", scripts);
+
+    QString jdguiPath = QString("%1/jd-gui.exe").arg(currentPath);
 
     if(argc <= 1){
         qDebug() << "useage: apktool XXX.apk";
+
+        QProcess::startDetached(jdguiPath, QStringList());
         return -1;
     }
     //E:\programes\apk\dex-tools-2.2\d2j-dex2jar.bat %1
 
-    QString currentPath = QCoreApplication::applicationDirPath();
+
     QString dexToolPath = QString("%1/dex-tools-2.2/d2j-dex2jar.bat").arg(currentPath);
 
-    QString apkPath = QString("%1").arg(argv[1]);
-    QFileInfo fi(apkPath);
+    QFileInfo fi(argv[1]);
 
     if(!fi.exists()){
         qDebug() << "apk文件路径错误啊!";
@@ -59,7 +64,10 @@ int main(int argc, char *argv[])
 
     //第一步生成jar文件
     QStringList params;
-    params << apkPath << "2>&1";
+    for(int i = 1; i < argc; i++){
+        params << QString("%1").arg(argv[i]);
+    }
+    params << "2>&1";
 
     QProcess p;
     p.start(dexToolPath, params);
@@ -71,7 +79,7 @@ int main(int argc, char *argv[])
 
     //第二步调用jd-gui
    if(output.indexOf("Exception") == -1){
-        QString jdguiPath = QString("%1/jd-gui.exe").arg(currentPath);
+
 
 
         qDebug() << fi.absolutePath() << fi.fileName() << fi.baseName();
